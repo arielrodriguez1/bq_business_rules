@@ -16,14 +16,32 @@ Este proyecto extrae metadatos de tablas BigQuery y genera documentación comple
 
 ```
 bq_business_rules/
-├── main.py                  # Script principal (interfaz CLI)
-├── bq_analyzer.py          # Análisis de BigQuery INFORMATION_SCHEMA
-├── excel_generator.py      # Generación de Excel con estilos Walmart
-├── requirements.txt        # Dependencias Python
-├── run.bat                 # Script de ejecución Windows
-├── output/                 # Archivos Excel generados (git-ignored)
-└── README.md              # Este archivo
+├── main.py                           # Script principal (interfaz CLI)
+├── bq_analyzer.py                   # Análisis de BigQuery INFORMATION_SCHEMA
+├── excel_generator.py               # Generación de Excel con estilos Walmart
+├── requirements.txt                 # Dependencias Python
+├── run.bat                          # Script de ejecución Windows
+├── Reglas_Negocio_template.xlsx    # 📋 TEMPLATE BASE (formato estandarizado)
+├── output/                          # Archivos Excel generados (git-ignored)
+└── README.md                        # Este archivo
 ```
+
+## 📋 Template Base
+
+El sistema utiliza **`Reglas_Negocio_template.xlsx`** como plantilla estandarizada para todos los archivos generados. Este template:
+
+✅ Mantiene formato corporativo consistente  
+✅ Incluye estilos, colores y configuración de Walmart  
+✅ Garantiza compatibilidad con herramientas de auditoría  
+✅ Permite personalización previa (logos, headers, footers)  
+
+**Ubicación fija**: `C:\Users\vn59q13\OneDrive - Walmart Inc\Documentos\bq_business_rules\Reglas_Negocio_template.xlsx`
+
+Cada ejecución:
+1. Copia el template
+2. Renombra con timestamp (`Reglas_Negocio_{tabla}_{timestamp}.xlsx`)
+3. Puebla con datos de BigQuery
+4. Mantiene todo el formato del template original
 
 ## Requisitos
 
@@ -99,6 +117,12 @@ Más de 200+ patrones de detección automática.
 - Email: ariel.rodriguez1@walmart.com
 
 ## Changelog
+
+### v2.1.0 (2026-04-20)
+- **[NUEVO]** Sistema basado en template estandarizado
+- **[NUEVO]** Uso de `Reglas_Negocio_template.xlsx` como base
+- Formato corporativo 100% consistente entre ejecuciones
+- Mejora en mantenibilidad y personalización
 
 ### v2.0.0 (2026-04-20)
 - Clasificacion automatica DC-DG-03-02 + Appendix A
