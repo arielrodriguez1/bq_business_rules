@@ -196,16 +196,11 @@ def generate_excel(
 
         ws.row_dimensions[row_idx].height = 50
 
-    # ── 6. Actualizar pestaña de metadatos ───────────────────────────────
-    # Si ya existe la hoja, la limpiamos; si no, la creamos
+    # ── 6. Actualizar pestaña de metadatos ──────────────────────────────────────
+    # Eliminar y recrear la hoja para evitar problemas con celdas fusionadas
     if "Metadatos" in wb.sheetnames:
-        ws_meta = wb["Metadatos"]
-        # Limpiar contenido previo
-        for row in ws_meta.iter_rows():
-            for cell in row:
-                cell.value = None
-    else:
-        ws_meta = wb.create_sheet("Metadatos")
+        wb.remove(wb["Metadatos"])
+    ws_meta = wb.create_sheet("Metadatos")
     meta_info = [
         ("Proyecto GCP",  project_id),
         ("Dataset",       dataset_id),
@@ -225,18 +220,10 @@ def generate_excel(
     ws_meta.column_dimensions["B"].width = 50
     
     # -- 7. Actualizar Resumen por Clasificacion de Sensibilidad --------------
-    # Si ya existe la hoja, la limpiamos; si no, la creamos
+    # Eliminar y recrear la hoja para evitar problemas con celdas fusionadas
     if "Resumen por Clasificacion" in wb.sheetnames:
-        ws_summary = wb["Resumen por Clasificacion"]
-        # Limpiar contenido previo
-        for row in ws_summary.iter_rows():
-            for cell in row:
-                cell.value = None
-                cell.fill = PatternFill(fill_type=None)
-                cell.font = Font()
-                cell.border = Border()
-    else:
-        ws_summary = wb.create_sheet("Resumen por Clasificacion", 1)
+        wb.remove(wb["Resumen por Clasificacion"])
+    ws_summary = wb.create_sheet("Resumen por Clasificacion", 1)  # Insert as 2nd sheet
     
     # Agrupar columnas por clasificación
     grouped = {}
