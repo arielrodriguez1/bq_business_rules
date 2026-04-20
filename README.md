@@ -1,0 +1,118 @@
+# BQ Business Rules Generator
+
+Generador automático de reglas de negocio desde BigQuery con clasificación de sensibilidad según DC-DG-03-02.
+
+## Descripción
+
+Este proyecto extrae metadatos de tablas BigQuery y genera documentación completa en Excel con:
+- Descripción funcional de columnas
+- Clasificación de sensibilidad (DC-DG-03-02 + Appendix A)
+- Criticidad y justificación
+- Ejemplos reales de datos
+- Valores permitidos y formatos
+- Tabla resumen por clasificación
+
+## Estructura del Proyecto
+
+```
+bq_business_rules/
+├── main.py                  # Script principal (interfaz CLI)
+├── bq_analyzer.py          # Análisis de BigQuery INFORMATION_SCHEMA
+├── excel_generator.py      # Generación de Excel con estilos Walmart
+├── requirements.txt        # Dependencias Python
+├── run.bat                 # Script de ejecución Windows
+├── output/                 # Archivos Excel generados (git-ignored)
+└── README.md              # Este archivo
+```
+
+## Requisitos
+
+- Python 3.13+
+- Google Cloud SDK configurado
+- Acceso a BigQuery
+- Credenciales autenticadas (`gcloud auth login`)
+
+## Instalación
+
+```bash
+# Instalar dependencias
+uv pip install -r requirements.txt
+```
+
+## Uso
+
+```bash
+python main.py
+```
+
+El script solicitará:
+1. Proyecto GCP
+2. Dataset
+3. Tabla(s) a analizar
+
+## Output
+
+El Excel generado contiene 3 pestañas:
+
+### 1. Reglas de Negocio
+Tabla detallada con 13 columnas por campo:
+- Columna, Descripción, Tabla Origen
+- Tipo, Formato, Valores Permitidos
+- Valor Nulo Permitido, Criticidad
+- Justificación, Ejemplo Real
+- Clasificación de Sensibilidad
+- Referencia Standard DC-DG-03-02
+- Observación detallada
+
+### 2. Resumen por Clasificación
+Tabla agrupada por nivel de sensibilidad:
+- 🔴 Highly Sensitive (PII, PHI, Financiero)
+- 🟠 Sensitive (Personal, Transaccional)
+- 🟢 Non Sensitive (Metadatos, Técnico)
+
+Con estadísticas y referencias específicas al DC-DG-03-02 Appendix A.
+
+### 3. Metadatos
+Información técnica del análisis (proyecto, dataset, tabla, fecha).
+
+## Clasificación de Sensibilidad
+
+Basada en **Global Data Sensitivity Classification Standard DC-DG-03-02**:
+
+- **Highly Sensitive**: SSN, tarjetas de pago, datos bancarios, salarios, PHI, credenciales, biométricos
+- **Sensitive**: Email, teléfono, direcciones, nombres, IDs de clientes/transacciones, IPs
+- **Non Sensitive**: Timestamps técnicos, códigos de estado, particiones, códigos geográficos
+
+Más de 200+ patrones de detección automática.
+
+## Compliance
+
+- ✅ GDPR
+- ✅ CCPA
+- ✅ PCI-DSS
+- ✅ HIPAA
+- ✅ DC-DG-03-02 (Walmart Standard)
+
+## Autor
+
+**Ariel Rodriguez** - Walmart Tech
+- Email: ariel.rodriguez1@walmart.com
+
+## Changelog
+
+### v2.0.0 (2026-04-20)
+- ✅ Clasificación automática DC-DG-03-02 + Appendix A
+- ✅ Tabla resumen por clasificación
+- ✅ Referencias específicas al Standard
+- ✅ Observaciones detalladas
+- ✅ Ejemplos reales de datos
+- ✅ Descripción funcional auto-generada
+
+### v1.0.0 (2026-04-19)
+- ✅ Análisis básico de INFORMATION_SCHEMA
+- ✅ Generación de Excel con estilos Walmart
+- ✅ Profiling de columnas
+
+## License
+
+Walmart Proprietary - Internal Use Only
