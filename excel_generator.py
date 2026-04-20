@@ -28,21 +28,21 @@ NULL_YES_COLOR = "D9EAD3"   # Verde suave  → Nulo permitido
 NULL_NO_COLOR  = "FCE5CD"   # Naranja suave → Nulo NO permitido
 TO_FILL_COLOR  = "FFF9E6"   # Amarillo muy suave → Campos por completar
 
-# Anchos mínimos por columna (caracteres)
+# Anchos minimos por columna (caracteres)
 COL_WIDTHS = {
     "Columna":                       25,
-    "Descripción":                   50,
+    "Descripcion":                   50,
     "Tabla Origen":                  45,
     "Tipo":                          18,
     "Formato":                       45,
     "Valores Permitidos":            55,
     "Valor Nulo Permitido":          22,
     "Criticidad":                    20,
-    "Justificación de Criticidad":   50,
+    "Justificacion de Criticidad":   50,
     "Ejemplo":                       35,
-    "Clasificación de Sensibilidad":  30,
+    "Clasificacion de Sensibilidad":  30,
     "Referencia Standard":           60,
-    "Observación":                   80,
+    "Observacion":                   80,
 }
 
 
@@ -115,7 +115,7 @@ def generate_excel(
         # ── 4. Estilos de filas de datos ─────────────────────────────────────
         null_col_idx = columns.index("Valor Nulo Permitido") + 1
         criticidad_col_idx = columns.index("Criticidad") + 1 if "Criticidad" in columns else -1
-        sensibilidad_col_idx = columns.index("Clasificación de Sensibilidad") + 1 if "Clasificación de Sensibilidad" in columns else -1
+        sensibilidad_col_idx = columns.index("Clasificacion de Sensibilidad") + 1 if "Clasificacion de Sensibilidad" in columns else -1
 
         for row_idx in range(2, num_rows + 1):
             is_alt = (row_idx % 2 == 0)
@@ -135,7 +135,7 @@ def generate_excel(
             # Color especial para "Valor Nulo Permitido"
             null_cell = ws.cell(row=row_idx, column=null_col_idx)
             null_val  = str(null_cell.value).strip()
-            if null_val == "Sí":
+            if null_val == "Si":
                 null_cell.fill = PatternFill("solid", fgColor=NULL_YES_COLOR)
                 null_cell.font = Font(name="Calibri", size=10, color="274E13")
             elif null_val == "No":
@@ -158,7 +158,7 @@ def generate_excel(
                     crit_cell.font = Font(name="Calibri", size=10, color="274E13")
                 crit_cell.alignment = Alignment(horizontal="center", vertical="top")
             
-            # Color especial para "Clasificación de Sensibilidad"
+            # Color especial para "Clasificacion de Sensibilidad"
             if sensibilidad_col_idx > 0:
                 sens_cell = ws.cell(row=row_idx, column=sensibilidad_col_idx)
                 sens_val = str(sens_cell.value).strip()
@@ -198,13 +198,13 @@ def generate_excel(
         ws_meta.column_dimensions["A"].width = 22
         ws_meta.column_dimensions["B"].width = 50
         
-        # ── 7. Pestaña de Resumen por Clasificación de Sensibilidad ──────────
+        # -- 7. Pestana de Resumen por Clasificacion de Sensibilidad ----------
         ws_summary = wb.create_sheet("Resumen por Clasificacion", 1)  # Insert as 2nd sheet
         
         # Agrupar columnas por clasificación
         grouped = {}
         for _, row in df.iterrows():
-            classification = row.get("Clasificación de Sensibilidad", "Non Sensitive")
+            classification = row.get("Clasificacion de Sensibilidad", "Non Sensitive")
             if classification not in grouped:
                 grouped[classification] = []
             grouped[classification].append(row)
@@ -284,7 +284,7 @@ def generate_excel(
             current_row += 1
             
             # Headers de la tabla
-            headers = ["Columna", "Tipo", "Referencia Standard", "Observación", "Ejemplo"]
+            headers = ["Columna", "Tipo", "Referencia Standard", "Observacion", "Ejemplo"]
             for col_idx, header in enumerate(headers, start=1):
                 header_cell = ws_summary.cell(row=current_row, column=col_idx, value=header)
                 header_cell.font = Font(name="Calibri", bold=True, size=10, color="FFFFFF")
@@ -300,7 +300,7 @@ def generate_excel(
                     row_data.get("Columna", ""),
                     row_data.get("Tipo", ""),
                     row_data.get("Referencia Standard", ""),
-                    row_data.get("Observación", ""),
+                    row_data.get("Observacion", ""),
                     row_data.get("Ejemplo", "")[:50] if row_data.get("Ejemplo", "") else "",  # Truncar ejemplo
                 ]
                 
@@ -323,7 +323,7 @@ def generate_excel(
         ws_summary.column_dimensions["A"].width = 25  # Columna
         ws_summary.column_dimensions["B"].width = 15  # Tipo
         ws_summary.column_dimensions["C"].width = 60  # Referencia Standard
-        ws_summary.column_dimensions["D"].width = 85  # Observación
+        ws_summary.column_dimensions["D"].width = 85  # Observacion
         ws_summary.column_dimensions["E"].width = 35  # Ejemplo
 
     print(f"\n[OK] Excel generado exitosamente:")

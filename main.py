@@ -74,35 +74,45 @@ def _separator():
 # ──────────────────────────────────────────────
 #  Sesión de credenciales (se piden una vez)
 # ──────────────────────────────────────────────
-def _get_session_credentials() -> tuple[str, str]:
+def _get_session_credentials() -> tuple[str, str, str]:
     """
     Solicita proyecto y dataset al inicio de la sesión.
-    Retorna (project_id, dataset_id).
+    Retorna (project_id, dataset_id, billing_project).
     """
     _separator()
     print(f"\n{BOLD}  >> Configuracion de sesion{RESET}\n")
-    project_id = _ask("Proyecto GCP",  "my-project-123456")
+    project_id = _ask("Proyecto GCP (donde estan los datos)",  "wmt-intl-cons-mc-k1-prod")
     dataset_id = _ask("Dataset en GCP", "mi_dataset")
-    return project_id, dataset_id
+    
+    print(f"\n  {YELLOW}[?] Necesitas usar un proyecto diferente para ejecutar queries (billing)?{RESET}")
+    print(f"      (Presiona ENTER para usar el mismo proyecto: {project_id})")
+    billing_project = input(f"  {BOLD}Billing Project{RESET}: ").strip()
+    
+    if not billing_project:
+        billing_project = project_id
+    
+    return project_id, dataset_id, billing_project
 
 
 # ──────────────────────────────────────────────
 #  Procesamiento de una tabla
 # ──────────────────────────────────────────────
-def _process_table(project_id: str, dataset_id: str, table_id: str):
+def _process_table(project_id: str, dataset_id: str, table_id: str, billing_project: str = None):
     print()
     _separator()
     print(f"\n{BOLD}  >> Procesando tabla: {project_id}.{dataset_id}.{table_id}{RESET}\n")
+    if billing_project and billing_project != project_id:
+        print(f"  {YELLOW}[i] Usando billing project: {billing_project}{RESET}\n")
     _separator()
 
     try:
         # 1. Analizar la tabla en BigQuery
-        df = analyze_table(project_id, dataset_id, table_id)
+        df = analyze_table(project_id, dataset_id, table_id, billing_project)
 
         # 2. Mostrar preview en consola
         _separator()
         print(f"\n{BOLD}  >> Vista previa de resultados ({len(df)} columnas){RESET}\n")
-        preview_cols = ["Columna", "Descripción", "Tipo", "Criticidad", "Clasificación de Sensibilidad"]
+        preview_cols = ["Columna", "Descripcion", "Tipo", "Criticidad", "Clasificacion de Sensibilidad"]
         print(df[preview_cols].to_string(index=False, max_colwidth=60))
         print()
 
@@ -136,7 +146,7 @@ def main():
     _banner()
 
     # Solicitar credenciales una sola vez por sesión
-    project_id, dataset_id = _get_session_credentials()
+    project_id, dataset_id, billing_project = _get_session_credentials()
 
     while True:
         _separator()
@@ -144,11 +154,11 @@ def main():
 
         table_id = _ask("Nombre de la tabla", "mi_tabla")
 
-        _process_table(project_id, dataset_id, table_id)
+        _process_table(project_id, dataset_id, table_id, billing_project)
 
-        # ── ¿Continuar? ─────────────────────────────────────────────────────
+        # -- Continuar? ----------------------------------------------------------
         _separator()
-        print(f"\n  {BOLD}¿Qué deseas hacer a continuación?{RESET}")
+        print(f"\n  {BOLD}Que deseas hacer a continuacion?{RESET}")
         print("    [1] Analizar otra tabla en el mismo dataset")
         print("    [2] Cambiar proyecto / dataset")
         print("    [3] Salir")
@@ -157,7 +167,7 @@ def main():
         if opcion == "1":
             continue
         elif opcion == "2":
-            project_id, dataset_id = _get_session_credentials()
+            project_id, dataset_id, billing_project = _get_session_credentials()
         else:
             print(f"\n  {GREEN}Hasta pronto!{RESET}\n")
             break

@@ -347,15 +347,23 @@ def generate_description(column_name: str, data_type: str, distinct_count: int =
 # ──────────────────────────────────────────────
 #  Función principal
 # ──────────────────────────────────────────────
-def analyze_table(project_id: str, dataset_id: str, table_id: str) -> pd.DataFrame:
+def analyze_table(project_id: str, dataset_id: str, table_id: str, billing_project: str = None) -> pd.DataFrame:
     """
     Analiza una tabla de BigQuery y devuelve un DataFrame con las
     reglas de negocio por columna.
 
+    Args:
+        project_id: Proyecto donde está la tabla
+        dataset_id: Dataset de la tabla
+        table_id: Nombre de la tabla
+        billing_project: Proyecto para billing (si es diferente al project_id)
+
     Columnas del DataFrame resultante:
         Columna | Tabla Origen | Tipo | Formato | Valores Permitidos | Valor Nulo Permitido
     """
-    client = bigquery.Client(project=project_id)
+    # Usar billing_project si se especifica, sino usar project_id
+    billing_proj = billing_project if billing_project else project_id
+    client = bigquery.Client(project=billing_proj)
     table_ref = f"`{project_id}.{dataset_id}.{table_id}`"
 
     print(f"\n[>>] Consultando INFORMATION_SCHEMA para: {project_id}.{dataset_id}.{table_id}")
@@ -397,7 +405,7 @@ def analyze_table(project_id: str, dataset_id: str, table_id: str) -> pd.DataFra
         distinct_count  = 0
 
         try:
-            # ¿Cuántos valores distintos tiene?
+            # Cuantos valores distintos tiene?
             q_distinct = f"""
                 SELECT COUNT(DISTINCT CAST({col} AS STRING)) AS cnt
                 FROM {table_ref}
@@ -486,18 +494,18 @@ def analyze_table(project_id: str, dataset_id: str, table_id: str) -> pd.DataFra
         
         rows.append({
             "Columna":                      col,
-            "Descripción":                  descripcion,
+            "Descripcion":                  descripcion,
             "Tabla Origen":                 f"{project_id}.{dataset_id}.{table_id}",
             "Tipo":                         data_type,
             "Formato":                      formato,
             "Valores Permitidos":           allowed_values,
-            "Valor Nulo Permitido":         "Sí" if is_nullable == "YES" else "No",
+            "Valor Nulo Permitido":         "Si" if is_nullable == "YES" else "No",
             "Criticidad":                   criticidad,
-            "Justificación de Criticidad":  justificacion,
+            "Justificacion de Criticidad":  justificacion,
             "Ejemplo":                      ejemplo_real,
-            "Clasificación de Sensibilidad": sensibilidad,
+            "Clasificacion de Sensibilidad": sensibilidad,
             "Referencia Standard":          referencia_std,
-            "Observación":                  observacion_std,
+            "Observacion":                  observacion_std,
         })
 
     print(f"\n[OK] Profiling completado para {len(rows)} columnas.")

@@ -66,9 +66,9 @@ Tabla detallada con 13 columnas por campo:
 
 ### 2. Resumen por Clasificación
 Tabla agrupada por nivel de sensibilidad:
-- 🔴 Highly Sensitive (PII, PHI, Financiero)
-- 🟠 Sensitive (Personal, Transaccional)
-- 🟢 Non Sensitive (Metadatos, Técnico)
+- [HIGH] Highly Sensitive (PII, PHI, Financiero)
+- [MED] Sensitive (Personal, Transaccional)
+- [LOW] Non Sensitive (Metadatos, Tecnico)
 
 Con estadísticas y referencias específicas al DC-DG-03-02 Appendix A.
 
@@ -87,11 +87,11 @@ Más de 200+ patrones de detección automática.
 
 ## Compliance
 
-- ✅ GDPR
-- ✅ CCPA
-- ✅ PCI-DSS
-- ✅ HIPAA
-- ✅ DC-DG-03-02 (Walmart Standard)
+- GDPR
+- CCPA
+- PCI-DSS
+- HIPAA
+- DC-DG-03-02 (Walmart Standard)
 
 ## Autor
 
@@ -101,17 +101,17 @@ Más de 200+ patrones de detección automática.
 ## Changelog
 
 ### v2.0.0 (2026-04-20)
-- ✅ Clasificación automática DC-DG-03-02 + Appendix A
-- ✅ Tabla resumen por clasificación
-- ✅ Referencias específicas al Standard
-- ✅ Observaciones detalladas
-- ✅ Ejemplos reales de datos
-- ✅ Descripción funcional auto-generada
+- Clasificacion automatica DC-DG-03-02 + Appendix A
+- Tabla resumen por clasificacion
+- Referencias especificas al Standard
+- Observaciones detalladas
+- Ejemplos reales de datos
+- Descripcion funcional auto-generada
 
 ### v1.0.0 (2026-04-19)
-- ✅ Análisis básico de INFORMATION_SCHEMA
-- ✅ Generación de Excel con estilos Walmart
-- ✅ Profiling de columnas
+- Analisis basico de INFORMATION_SCHEMA
+- Generacion de Excel con estilos Walmart
+- Profiling de columnas
 
 ## License
 
