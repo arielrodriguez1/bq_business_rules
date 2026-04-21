@@ -79,6 +79,7 @@ WALMART_PROJECTS = [
     "wmt-intl-cons-mc-k1-prod",
     "wmt-k1-dwh-data-prod",
     "wmt-edw-prod",
+    "wmt-k1-cons-data-users",
 ]
 
 
