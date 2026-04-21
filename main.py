@@ -22,7 +22,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
-from bq_analyzer    import analyze_table
+from bq_analyzer    import analyze_table, validate_bigquery_permissions
 from excel_generator import generate_excel
 
 
@@ -72,6 +72,41 @@ def _separator():
 
 
 # ──────────────────────────────────────────────
+#  Proyectos predefinidos de Walmart
+# ──────────────────────────────────────────────
+WALMART_PROJECTS = [
+    "wmt-intl-cons-local-k1-prod",
+    "wmt-intl-cons-mc-k1-prod",
+    "wmt-k1-dwh-data-prod",
+    "wmt-edw-prod",
+]
+
+
+def _select_project() -> str:
+    """
+    Muestra un menú de proyectos predefinidos + opción 'Otro'.
+    Retorna el project_id seleccionado.
+    """
+    print(f"\n{BOLD}  Selecciona un proyecto GCP:{RESET}\n")
+    
+    for idx, proj in enumerate(WALMART_PROJECTS, start=1):
+        print(f"    [{idx}] {proj}")
+    print(f"    [{len(WALMART_PROJECTS) + 1}] {YELLOW}Otro (digitar manualmente){RESET}")
+    
+    while True:
+        choice = input(f"\n  {BOLD}Opción{RESET}: ").strip()
+        
+        if choice.isdigit():
+            idx = int(choice)
+            if 1 <= idx <= len(WALMART_PROJECTS):
+                return WALMART_PROJECTS[idx - 1]
+            elif idx == len(WALMART_PROJECTS) + 1:
+                return _ask("Proyecto GCP", "mi-proyecto-gcp")
+        
+        print(f"  {RED}[!] Opción inválida. Por favor selecciona un número del 1 al {len(WALMART_PROJECTS) + 1}.{RESET}")
+
+
+# ──────────────────────────────────────────────
 #  Sesión de credenciales (se piden una vez)
 # ──────────────────────────────────────────────
 def _get_session_credentials() -> tuple[str, str, str]:
@@ -81,7 +116,21 @@ def _get_session_credentials() -> tuple[str, str, str]:
     """
     _separator()
     print(f"\n{BOLD}  >> Configuracion de sesion{RESET}\n")
-    project_id = _ask("Proyecto GCP (donde estan los datos)",  "wmt-intl-cons-mc-k1-prod")
+    
+    # Selección de proyecto desde menú
+    project_id = _select_project()
+    
+    # Validar permisos de BigQuery en el proyecto
+    print(f"\n  {YELLOW}[i] Validando permisos de BigQuery en {project_id}...{RESET}")
+    has_permissions = validate_bigquery_permissions(project_id)
+    
+    if not has_permissions:
+        print(f"\n  {RED}[!] ERROR: No tienes permisos 'bigquery.jobs.create' en el proyecto {project_id}.{RESET}")
+        print(f"      Solicita acceso o selecciona otro proyecto.\n")
+        return _get_session_credentials()  # Recursión para volver a intentar
+    
+    print(f"  {GREEN}[OK] Permisos validados correctamente.{RESET}\n")
+    
     dataset_id = _ask("Dataset en GCP", "mi_dataset")
     
     print(f"\n  {YELLOW}[?] Necesitas usar un proyecto diferente para ejecutar queries (billing)?{RESET}")
@@ -90,6 +139,17 @@ def _get_session_credentials() -> tuple[str, str, str]:
     
     if not billing_project:
         billing_project = project_id
+    else:
+        # Validar permisos en billing project también
+        print(f"\n  {YELLOW}[i] Validando permisos en billing project {billing_project}...{RESET}")
+        has_billing_permissions = validate_bigquery_permissions(billing_project)
+        
+        if not has_billing_permissions:
+            print(f"\n  {RED}[!] ERROR: No tienes permisos 'bigquery.jobs.create' en {billing_project}.{RESET}")
+            print(f"      Usando el proyecto principal para billing.\n")
+            billing_project = project_id
+        else:
+            print(f"  {GREEN}[OK] Permisos de billing validados.{RESET}\n")
     
     return project_id, dataset_id, billing_project
 

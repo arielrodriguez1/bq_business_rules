@@ -7,11 +7,53 @@ para extraer metadatos de reglas de negocio.
 """
 
 from google.cloud import bigquery
+from google.api_core import exceptions
 import pandas as pd
 import warnings
 
 # Suprimir el warning de credenciales de Google Cloud SDK
 warnings.filterwarnings('ignore', message='Your application has authenticated using end user credentials')
+
+
+# ──────────────────────────────────────────────
+#  Validación de permisos de BigQuery
+# ──────────────────────────────────────────────
+def validate_bigquery_permissions(project_id: str) -> bool:
+    """
+    Valida que el usuario tenga permisos de bigquery.jobs.create en el proyecto.
+    
+    Args:
+        project_id: Proyecto GCP a validar
+    
+    Returns:
+        True si tiene permisos, False en caso contrario
+    """
+    try:
+        client = bigquery.Client(project=project_id)
+        
+        # Intentar ejecutar una query simple de validación
+        query = "SELECT 1 AS test_permission"
+        query_job = client.query(query)
+        
+        # Esperar a que complete (debería ser instantáneo)
+        query_job.result(timeout=5)
+        
+        return True
+        
+    except exceptions.Forbidden as e:
+        # Error 403 = Sin permisos
+        print(f"\n[!] Error de permisos: {e}")
+        return False
+        
+    except exceptions.NotFound as e:
+        # Error 404 = Proyecto no existe o no tienes acceso
+        print(f"\n[!] Proyecto no encontrado o sin acceso: {e}")
+        return False
+        
+    except Exception as e:
+        # Otros errores
+        print(f"\n[!] Error al validar permisos: {e}")
+        return False
 
 
 # ──────────────────────────────────────────────
@@ -363,6 +405,14 @@ def analyze_table(project_id: str, dataset_id: str, table_id: str, billing_proje
     """
     # Usar billing_project si se especifica, sino usar project_id
     billing_proj = billing_project if billing_project else project_id
+    
+    # Validar permisos antes de continuar
+    if not validate_bigquery_permissions(billing_proj):
+        raise PermissionError(
+            f"No tienes permisos 'bigquery.jobs.create' en el proyecto '{billing_proj}'.\n"
+            f"Solicita acceso al proyecto o contacta a tu administrador de GCP."
+        )
+    
     client = bigquery.Client(project=billing_proj)
     table_ref = f"`{project_id}.{dataset_id}.{table_id}`"
 

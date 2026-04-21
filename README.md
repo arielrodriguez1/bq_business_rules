@@ -16,12 +16,15 @@ Este proyecto extrae metadatos de tablas BigQuery y genera documentación comple
 
 ```
 bq_business_rules/
-├── main.py                           # Script principal (interfaz CLI)
-├── bq_analyzer.py                   # Análisis de BigQuery INFORMATION_SCHEMA
+├── main.py                           # Script principal (interfaz CLI con menú)
+├── bq_analyzer.py                   # Análisis de BQ + validación de permisos
 ├── excel_generator.py               # Generación de Excel con estilos Walmart
+├── test_permisos.py                 # 🔍 Test de permisos BigQuery
 ├── requirements.txt                 # Dependencias Python
 ├── run.bat                          # Script de ejecución Windows
+├── test_permisos.bat                # 🔍 Launcher del test de permisos
 ├── Reglas_Negocio_template.xlsx    # 📋 TEMPLATE BASE (formato estandarizado)
+├── ACTUALIZACION_PROYECTOS.md      # 📘 Documentación de cambios v2.2
 ├── output/                          # Archivos Excel generados (git-ignored)
 └── README.md                        # Este archivo
 ```
@@ -47,8 +50,13 @@ Cada ejecución:
 
 - Python 3.13+
 - Google Cloud SDK configurado
-- Acceso a BigQuery
+- Acceso a BigQuery con permisos:
+  - `bigquery.jobs.create` (validado automáticamente)
+  - `bigquery.datasets.get`
+  - `bigquery.tables.get`
+  - `bigquery.tables.getData`
 - Credenciales autenticadas (`gcloud auth login`)
+- Walmart VPN o Eagle WiFi (requerido para acceso a GCP)
 
 ## Instalación
 
@@ -59,14 +67,50 @@ uv pip install -r requirements.txt
 
 ## Uso
 
+### Ejecución Normal
+
 ```bash
+# Opción 1: Doble clic en Windows
+run.bat
+
+# Opción 2: Línea de comandos
 python main.py
 ```
 
-El script solicitará:
-1. Proyecto GCP
-2. Dataset
-3. Tabla(s) a analizar
+El script presenta un **menú interactivo** que solicita:
+
+1. **Proyecto GCP** (menú de selección):
+   - [1] wmt-intl-cons-local-k1-prod
+   - [2] wmt-intl-cons-mc-k1-prod
+   - [3] wmt-k1-dwh-data-prod
+   - [4] wmt-edw-prod
+   - [5] Otro (digitar manualmente)
+
+2. **Validación automática** de permisos `bigquery.jobs.create`
+
+3. **Dataset** en el proyecto seleccionado
+
+4. **Billing Project** (opcional, si difiere del proyecto de datos)
+
+5. **Tabla(s)** a analizar
+
+### Test de Permisos
+
+Para verificar permisos sin ejecutar el análisis completo:
+
+```bash
+# Opción 1: Doble clic
+test_permisos.bat
+
+# Opción 2: Línea de comandos
+python test_permisos.py
+```
+
+Esta herramienta:
+- ✅ Valida permisos en todos los proyectos predefinidos
+- ✅ Permite probar proyectos personalizados
+- ✅ Muestra resumen de accesos y errores
+- ✅ Útil para troubleshooting de permisos
 
 ## Output
 
@@ -117,6 +161,15 @@ Más de 200+ patrones de detección automática.
 - Email: ariel.rodriguez1@walmart.com
 
 ## Changelog
+
+### v2.2.0 (2026-04-21)
+- **[NUEVO]** Menú de selección de proyectos predefinidos
+- **[NUEVO]** Validación automática de permisos BigQuery
+- **[NUEVO]** Script de test de permisos (`test_permisos.py`)
+- **[NUEVO]** Documentación detallada en `ACTUALIZACION_PROYECTOS.md`
+- Manejo mejorado de errores de acceso y permisos
+- Validación de billing project
+- UX mejorada con mensajes en español
 
 ### v2.1.0 (2026-04-20)
 - **[NUEVO]** Sistema basado en template estandarizado
